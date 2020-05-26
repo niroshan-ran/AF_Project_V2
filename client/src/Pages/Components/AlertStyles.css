@@ -1,0 +1,18 @@
+#general, #admin {
+    width: 20%;
+}
+
+#list {
+    height: 410px;
+
+}
+
+
+#toastMessage {
+    left: 1500px;
+    top: 100px;
+}
+
+#toastMessageAdmin {
+
+}
