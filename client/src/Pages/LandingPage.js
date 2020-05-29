@@ -31,14 +31,11 @@ function LandingPage(isLoggedIn) {
     }, [])
 
 
-    if (isLoggedIn) {
-
-        loadUser1().then((res) => {
-            setUser({
-                userID: res.data._id
-            })
-            //console.log(user.userID);
-        });
+        // loadUser1().then((res) => {
+        //     setUser({
+        //         userID: res.data._id
+        //     })
+        // });
 
         const addToWishList = (productID) => {
             console.log(productID);
@@ -146,7 +143,7 @@ function LandingPage(isLoggedIn) {
                                     </li>
 
                                     <li className="nav-item active">
-                                        <a className="nav-link" onClick={logOut}><i className="fa fa-user fa-2x" /> Logout <span className="sr-only">(current)</span></a>
+                                        <a className="nav-link" onClick={() => logOut()}><i className="fa fa-user fa-2x" /> Logout <span className="sr-only">(current)</span></a>
                                     </li>
                                 </ul>
 
@@ -162,7 +159,6 @@ function LandingPage(isLoggedIn) {
             </div>
         )
 
-    }
 }
 //export default LandingPage
 const mapStateToProps = state => ({

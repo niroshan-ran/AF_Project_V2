@@ -43,12 +43,12 @@ const App = () => {
                 <Router>
                     <Switch>
                         <Route path="/register" component={Register}/>
-                        <Route path="/allProduct" component={AllProduct}/>
+                        <Route path="/allProduct/:name" component={AllProduct}/>
                         <Route path="/UserPages" component={UserPages}/>
                         <Route path="/admin" component={AdminPages}/>
                         <Route path="/feedback" component={Feedback}/>
                         <Route path="/contact-us" component={ContactUs}/>
-                        <Route path="/CartView" component={CartView}/>
+                        <Route path="/CartView/:user" component={CartView}/>
                         <Route path="/login" component={Login}/>
                         <Route path="/LandingPage" component={LandingPage}/>
                         <Route path="/MyCart" component={MyCart}/>

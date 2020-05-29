@@ -2,23 +2,22 @@ import React, {useEffect, useState} from "react";
 import '../CSS/header.css';
 import logo from '../Images/logo.jpg';
 import axios from "axios";
-
+import {Link} from "react-router-dom";
 
 const Header = () => {
 
     const [posts, setPosts] = useState([]);
 
+    const doSom  = ()=>{
+        axios.get("http://localhost:4001/category/")
+            .then(response => {
+                    setPosts(response.data);
+            })
+    }
 
         useEffect(() => {
-
-            function catClick(){
-                axios.get("http://localhost:4001/category/")
-                    .then(response => {
-                            setPosts(response.data.map(category => category.cname));
-                            console.log("ss:"+posts)
-                    })
-            }
-        }, [])
+            console.log("post:"+posts);
+        }, [posts])
 
 
 
@@ -47,15 +46,14 @@ const Header = () => {
                             </li>
 
                             <li className="nav-item dropdown">
-                                <a className="nav-link dropdown-toggle" href="/allProduct" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                <a className="nav-link dropdown-toggle" onClick={doSom} id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                                     Category
                                 </a>
 
                                 <div className="dropdown-menu" aria-labelledby="navbarDropdown">
                                     {posts.map((post,index) =>
-                                    <div key={index} className="dropdown-item">{post.cname}</div>
-                                    )}
-                                    <a href="/allProduct" className="dropdown-item">All Product</a>
+                                    <Link key={index} to={"/allProduct/"+post.cname}  className="dropdown-item">{post.cname}</Link>
+                                )}
 
                                 </div>
                             </li>

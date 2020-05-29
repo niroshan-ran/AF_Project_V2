@@ -30,12 +30,7 @@ import {useDispatch} from 'react-redux';
 
     componentDidMount() {
 
-        loadUser1().then(res => {
-            this.setState({
-                userID: res.data._id
-            })
-        })
-        console.log(this.state.userID);
+        console.log("This is user id :" +this.props.match.params.user);
 
         axios.get('http://localhost:4001/cart/')
             .then(response => {

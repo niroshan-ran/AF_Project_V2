@@ -16,7 +16,6 @@ class AllProduct extends Component {
 
     componentDidMount() {
 
-
         axios.get('http://localhost:4001/product/')
             .then(response => {
                 this.setState({products :response.data})
@@ -70,7 +69,7 @@ class AllProduct extends Component {
     }
 
     productList(){
-        return this.state.products.map((product,i) =>(
+        return this.state.products.filter((prod) => prod.PCategory===this.props.match.params.name).map((product,i) =>(
             <div className="col-sm-6 col-md-4 mb-1" key={i}>
                 <div className="img-thumbnail">
                     <img className="img-responsive" alt="logo" width={200} height={350} src={product.PImage}/>
@@ -105,7 +104,7 @@ class AllProduct extends Component {
             <div>
                 <Header/>
 
-                <div className="p-3 mb-2 bg-dark text-light text-center"><h1>Our Products</h1></div>
+                <div className="p-3 mb-2 bg-dark text-light text-center"><h1>{this.props.match.params.name}</h1></div>
                 <div className="container-xl d-flex justify-content-center">
                     <div className="row">
                        {this.productList()}
