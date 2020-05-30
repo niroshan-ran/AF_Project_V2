@@ -1,5 +1,5 @@
 import React from 'react';
-import {BrowserRouter as Router, Route} from "react-router-dom";
+import {BrowserRouter as Router, Redirect, Route} from "react-router-dom";
 import "bootstrap/dist/css/bootstrap.min.css"
 
 import RegisterSM from "./add-sm.component";
@@ -14,8 +14,9 @@ import CusFeedback from "./Feedback";
 import SMPage from "./SMPage";
 import Login from "./SMLogin";
 
-function App() {
+const App = ({isLoggedIn}) => {
     return (
+        isLoggedIn ? (
         <Router>
             <div className="" style={{background:"white"}}>
                 <Navbar />
@@ -39,6 +40,11 @@ function App() {
                 </div>
             </div>
         </Router>
+        ):(
+            <div>
+                <Redirect to="/"/>
+            </div>
+        )
     );
 }
 
