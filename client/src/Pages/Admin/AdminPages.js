@@ -13,6 +13,8 @@ import NewOrders from "./new-order.component";
 import CusFeedback from "./Feedback";
 import SMPage from "./SMPage";
 import Login from "./SMLogin";
+import {connect} from "react-redux";
+import {logOut} from "../../action/auth";
 
 const App = ({isLoggedIn}) => {
     return (
@@ -47,5 +49,8 @@ const App = ({isLoggedIn}) => {
         )
     );
 }
+const mapStateToProps = state => ({
+    isLoggedIn: state.isLoggedIn
+});
 
-export default App;
+export default connect(mapStateToProps)(App);
