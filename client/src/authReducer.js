@@ -1,11 +1,12 @@
 import {
-    REGISTER_SUCCESS,
-    LOGIN_SUCCESS,
-    LOGIN_FAIL,
-    REGISTER_FAIL,
+    ADD_TO_CART_USER,
+    AUTH_ERROR,
     LOAD_USER,
-    AUTH_ERROR, LOG_OUT,
-    ADD_TO_CART_USER
+    LOG_OUT,
+    LOGIN_FAIL,
+    LOGIN_SUCCESS,
+    REGISTER_FAIL,
+    REGISTER_SUCCESS
 } from './constants/constants';
 
 const initialState = {
@@ -40,6 +41,8 @@ const authReducer = (state = initialState,action) => {
         case REGISTER_FAIL:
         case AUTH_ERROR:
             localStorage.removeItem('token');
+            localStorage.removeItem('userType');
+            localStorage.removeItem('userId');
             return {
                 ...state,
                 isLoggedIn: false,
@@ -47,7 +50,9 @@ const authReducer = (state = initialState,action) => {
             }
         case LOG_OUT:
             localStorage.removeItem('token');
-            return{
+            localStorage.removeItem('userType');
+            localStorage.removeItem('userId');
+            return {
                 ...state,
                 isLoggedIn: false
             }

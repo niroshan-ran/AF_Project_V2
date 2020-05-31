@@ -1,7 +1,7 @@
 import React, {useState} from "react";
 import {loadUser1, loginUser} from "../action/auth";
 import {connect} from 'react-redux';
-import {Link, Redirect} from "react-router-dom";
+import {Redirect} from "react-router-dom";
 import '../CSS/login.css';
 import Header from "./Header";
 import Swal from "sweetalert2";
@@ -44,16 +44,24 @@ const Login = ({loginUser, isLoggedIn}) => {
             })
 
 
+
         });
 
-        //console.log(user.position);
+
         switch (user.position) {
             case 'admin':
                 return <Redirect to="/admin"/>
             case 'sm':
                 return <Redirect to="/admin"/>
             case 'user':
-                return <Redirect to={"/CartView/"+user.userId}/>
+                if (!localStorage.getItem('userType')) {
+                    localStorage.setItem('userType', user.position);
+                }
+
+                if (!localStorage.getItem('userId')) {
+                    localStorage.setItem('userId', user.userId);
+                }
+                return <Redirect to={"/CartView/" + localStorage.getItem('userId')}/>
         }
 
 
