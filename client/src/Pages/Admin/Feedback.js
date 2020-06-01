@@ -115,7 +115,7 @@ class Feedback extends Component {
             marginLeft: theme.spacing(1),
             marginRight: theme.spacing(1),
             width: 200,
-        },
+        }
     }));
 
 
@@ -124,13 +124,16 @@ class Feedback extends Component {
 
     scrollFunction() {
 
-        let mybutton = document.getElementById("myBtn");
+        let myButton = document.getElementById("myBtn");
 
-        if (document.body.scrollTop > 20 || document.documentElement.scrollTop > 20) {
-            mybutton.style.display = "block";
-        } else {
-            mybutton.style.display = "none";
+        if (myButton !== undefined) {
+            if (document.body.scrollTop > 20 || document.documentElement.scrollTop > 20) {
+                myButton.style.display = 'block';
+            } else {
+                myButton.style.display = 'none';
+            }
         }
+
     }
 
     topFunction() {

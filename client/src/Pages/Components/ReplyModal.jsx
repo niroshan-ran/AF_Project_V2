@@ -16,11 +16,17 @@ class ReplyModal extends Component {
         }
     }
 
-    componentWillReceiveProps(nextProps, nextContext) {
-        this.setState({
-            show: nextProps.showModale,
-            feedback: nextProps.feedbackObj
-        })
+    static getDerivedStateFromProps(nextProps, prevState) {
+
+        if (nextProps !== prevState) {
+            return ({
+                show: nextProps.showModale,
+                feedback: nextProps.feedbackObj
+            });
+        }
+
+        return null;
+
     }
 
 
