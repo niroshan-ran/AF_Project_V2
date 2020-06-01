@@ -1,14 +1,19 @@
 import React, {Component} from "react";
 import Card from "react-bootstrap/Card";
-import Container from "react-bootstrap/Container";
+import 'date-fns';
 import Rating from "@material-ui/lab/Rating";
 import {makeStyles} from "@material-ui/core/styles";
 import ReplyModal from "../Components/ReplyModal";
 import Box from "@material-ui/core/Box";
 import ToastMessage from "../Components/ToastMessage";
 import "../Components/AlertStyles.css";
-
-//import {Link} from "react-router-dom";
+import Form from "react-bootstrap/Form";
+import FormControl from "@material-ui/core/FormControl";
+import ArrowIcon from '@material-ui/icons/ArrowUpward';
+import TextField from "@material-ui/core/TextField";
+import Button from "react-bootstrap/Button";
+import CardGroup from "react-bootstrap/CardGroup";
+import Fab from "@material-ui/core/Fab";
 
 
 class Feedback extends Component {
@@ -22,14 +27,24 @@ class Feedback extends Component {
             showModale: false,
             showToast: false,
             toastMessage: '',
-            toastType: 'Error',
-            typeColor: 'error'
+            toastType: '',
+            typeColor: '',
+            dateRange: {
+                startDate: new Date(),
+                endDate: new Date()
+            }
+
         }
+
+        window.onscroll = () => {
+            this.scrollFunction()
+        };
     }
 
     componentDidMount() {
         this.fetchData();
     }
+
 
     labels = {
 
@@ -86,13 +101,43 @@ class Feedback extends Component {
         });
     }
 
-    useStyles = () => makeStyles({
+    useStyles = () => makeStyles((theme) => ({
         root: {
             width: "auto",
             display: 'flex',
             alignItems: 'center',
+        },
+        container: {
+            display: 'flex',
+            flexWrap: 'wrap',
+        },
+        textField: {
+            marginLeft: theme.spacing(1),
+            marginRight: theme.spacing(1),
+            width: 200,
+        },
+    }));
+
+
+// When the user scrolls down 20px from the top of the document, show the button
+
+
+    scrollFunction() {
+
+        let mybutton = document.getElementById("myBtn");
+
+        if (document.body.scrollTop > 20 || document.documentElement.scrollTop > 20) {
+            mybutton.style.display = "block";
+        } else {
+            mybutton.style.display = "none";
         }
-    });
+    }
+
+    topFunction() {
+        document.body.scrollTop = 0;
+        document.documentElement.scrollTop = 0;
+    }
+
 
     onReplySubmit = (event, obj) => {
 
@@ -128,7 +173,7 @@ class Feedback extends Component {
                         showToast: true,
                         toastMessage: "Unexpected Response Status " + r.status + " Occurred...",
                         toastType: 'Error',
-                        typeColor: "error"
+                        typeColor: "warning"
                     });
                 }
             })
@@ -150,6 +195,75 @@ class Feedback extends Component {
         }, 5000);
     }
 
+    searchFeedback(event) {
+
+        event.preventDefault();
+
+        fetch("http://localhost:4001/feedback/search/" + this.state.dateRange.startDate + "/" + this.state.dateRange.endDate, {
+            method: 'GET'
+        }).then(response => response.json())
+            .then(json => this.setState({
+                feedbackList: json
+            }, () => {
+
+                this.setState({
+                    showModale: false
+                }, () => {
+
+                    let sortedList = this.state.feedbackList;
+
+                    sortedList.sort((a, b) => {
+                        return new Date(b.createdAt) - new Date(a.createdAt)
+                    })
+
+                    this.setState({
+                        feedbackList: sortedList
+                    })
+
+                    if (this.state.feedbackList.length > 0) {
+                        this.setState({
+                            showToast: true,
+                            toastMessage: 'Results Found!!!',
+                            toastType: 'Information',
+                            typeColor: "success"
+                        })
+
+
+                    } else {
+
+                        this.fetchData();
+
+                        this.setState({
+                            showToast: true,
+                            toastMessage: 'No Results!!!',
+                            toastType: 'Information',
+                            typeColor: "info"
+                        })
+                    }
+                })
+
+                document.getElementById('start datetime-local').value = "";
+                document.getElementById('end datetime-local').value = "";
+
+
+            })).catch(() => {
+            this.setState({
+                showToast: true,
+                toastMessage: "Unexpected Issue Occurred...",
+                toastType: 'Error',
+                typeColor: "error"
+            });
+        });
+
+        setTimeout(() => {
+            this.setState({
+                showToast: false
+            })
+        }, 5000);
+
+
+    }
+
 
     render() {
 
@@ -161,94 +275,156 @@ class Feedback extends Component {
 
         return (
 
+            <>
 
-            <div className="pt-0">
+                <Fab color="secondary" id="myBtn" aria-label="add" onClick={() => this.topFunction()}>
+                    <ArrowIcon/>
+                </Fab>
+
                 <div className="fixed-bottom w-100" id="toastMessageAdmin">
                     <ToastMessage tId={"admin"} showFunction={this.setShow} showToast={this.state.showToast}
                                   message={this.state.toastMessage} messageType={this.state.toastType}
                                   statusColor={this.state.typeColor}/>
                 </div>
-                <Container>
-                    <Card className="pt-0">
-                        <Card.Header as="h5">Feedback&nbsp;from&nbsp;Users</Card.Header>
-                        <Card.Body>
 
-                            {
-                                feedbackList.map((feedback, index) => (
-                                    <div key={index}>
-                                        <div className="mr-5">
-                                            <Card>
-                                                <Card.Header>
-                                                    <div className="float-left">
-                                                        {feedback.name}
-                                                    </div>
-                                                    <div className="float-right">
-                                                        {feedback.email}
-                                                    </div>
-                                                </Card.Header>
-                                                <Card.Body>
-                                                    <div className="float-left w-75">
+                <div className="m-xl-5">
+                    <Form onSubmit={(event) => this.searchFeedback(event)}>
+                        <CardGroup>
 
-                                                        <Card.Title>{feedback.comment}</Card.Title>
+                            <Card>
+                                <Card.Title className="m-xl-5">Search&nbsp;by&nbsp;Date/Time&nbsp;Range</Card.Title>
+                            </Card>
+                            <Card>
+                                <FormControl className="m-xl-5">
+                                    <TextField
+                                        id="start datetime-local"
+                                        label="Start Date/Time"
+                                        type="datetime-local"
+                                        required
+                                        onChange={(event) => this.setState({
+                                            dateRange: {
+                                                startDate: event.target.value,
+                                                endDate: this.state.dateRange.endDate
+                                            }
 
-                                                        <div className={classes.root}>
-                                                            <Rating
-                                                                size="large"
-                                                                max={7}
-                                                                name="read-only size-large"
-                                                                value={feedback.rating}
-                                                                precision={1}
-                                                                readOnly
-                                                            />
-                                                            <Box ml={0.5}
-                                                                 className="text-muted">{this.labels[feedback.rating]}</Box>
-                                                        </div>
+                                        }, () => {
+                                            console.log(this.state.dateRange.startDate.toString())
+                                        })}
+                                        className={classes.textField}
+                                        InputLabelProps={{
+                                            shrink: true,
+                                        }}
+                                    />
+                                </FormControl>
+                            </Card>
+                            <Card>
+                                <FormControl className="m-xl-5">
+                                    <TextField
+                                        id="end datetime-local"
+                                        label="End Date/Time"
+                                        type="datetime-local"
+                                        required
+                                        onChange={(event) => this.setState({
+                                            dateRange: {
+                                                startDate: this.state.dateRange.startDate,
+                                                endDate: event.target.value
+                                            }
+                                        }, () => {
+                                            console.log(this.state.dateRange.endDate.toString())
+                                        })}
+                                        className={classes.textField}
+                                        InputLabelProps={{
+                                            shrink: true,
+                                        }}
+                                    />
+                                </FormControl>
 
-                                                        <hr/>
+                            </Card>
+                            <Card>
+                                <Button className="m-xl-5 btn" variant="primary" type="submit">Search</Button>
+                            </Card>
+                        </CardGroup>
 
-                                                        {
-                                                            feedback.reply !== "" ?
-                                                                <div>
-                                                                    <Card.Subtitle>Reply</Card.Subtitle>
-                                                                    <Card.Text>{feedback.reply}</Card.Text>
-                                                                </div> : <></>
-                                                        }
+                    </Form>
+                </div>
 
+                <hr/>
 
-                                                    </div>
-                                                    <div className="float-right flex-row w-25 text-center">
-
-                                                        <ReplyModal showModal={this.state.showModale}
-                                                                    onReplySubmit={this.onReplySubmit}
-                                                                    feedbackObj={feedback}/>
-
-                                                    </div>
-
-
-                                                </Card.Body>
-                                                <Card.Footer>
-                                                    <div className="float-left">
-                                                        Created&nbsp;on&nbsp;{new Date(feedback.createdAt).toLocaleDateString()}&nbsp;@&nbsp;{new Date(feedback.createdAt).toLocaleTimeString()}
-                                                    </div>
-                                                    {
-                                                        feedback.reply !== "" ?
-                                                            <div className="float-right">
-                                                                Replied&nbsp;on&nbsp;{new Date(feedback.updatedAt).toLocaleDateString()}&nbsp;@&nbsp;{new Date(feedback.updatedAt).toLocaleTimeString()}
-                                                            </div> : <></>
-                                                    }
-                                                </Card.Footer>
-
-                                            </Card>
+                {
+                    feedbackList.map((feedback, index) => (
+                        <div key={index}>
+                            <div className="mr-xl-5 ml-xl-5">
+                                <Card>
+                                    <Card.Header>
+                                        <div className="float-left">
+                                            {feedback.name}
                                         </div>
-                                        <hr/>
-                                    </div>
-                                ))
+                                        <div className="float-right">
+                                            {feedback.email}
+                                        </div>
+                                    </Card.Header>
+                                    <Card.Body>
+                                        <div className="float-left w-75">
 
-                            }
-                        </Card.Body>
-                    </Card>
-                </Container>
-            </div>
+                                            <Card.Title>{feedback.comment}</Card.Title>
+
+                                            <div className={classes.root}>
+                                                <Rating
+                                                    size="large"
+                                                    max={7}
+                                                    name="read-only size-large"
+                                                    value={feedback.rating}
+                                                    precision={1}
+                                                    readOnly
+                                                />
+                                                <Box ml={0.5}
+                                                     className="text-muted">{this.labels[feedback.rating]}</Box>
+                                            </div>
+
+                                            <hr/>
+
+                                            {
+                                                feedback.reply !== "" ?
+                                                    <div>
+                                                        <Card.Subtitle>Reply</Card.Subtitle>
+                                                        <Card.Text>{feedback.reply}</Card.Text>
+                                                    </div> : <></>
+                                            }
+
+
+                                        </div>
+                                        <div className="float-right flex-row w-25 text-center">
+
+                                            <ReplyModal showModal={this.state.showModale}
+                                                        onReplySubmit={this.onReplySubmit}
+                                                        feedbackObj={feedback}/>
+
+                                        </div>
+
+
+                                    </Card.Body>
+                                    <Card.Footer>
+                                        <div className="float-left">
+                                            Created&nbsp;on&nbsp;{new Date(feedback.createdAt).toLocaleDateString()}&nbsp;@&nbsp;{new Date(feedback.createdAt).toLocaleTimeString()}
+                                        </div>
+                                        {
+                                            feedback.reply !== "" ?
+                                                <div className="float-right">
+                                                    Replied&nbsp;on&nbsp;{new Date(feedback.updatedAt).toLocaleDateString()}&nbsp;@&nbsp;{new Date(feedback.updatedAt).toLocaleTimeString()}
+                                                </div> : <></>
+                                        }
+                                    </Card.Footer>
+
+                                </Card>
+                            </div>
+                            <hr/>
+                        </div>
+                    ))
+
+                }
+
+
+            </>
 
 
         );
@@ -259,3 +435,4 @@ class Feedback extends Component {
 
 
 export default (Feedback);
+

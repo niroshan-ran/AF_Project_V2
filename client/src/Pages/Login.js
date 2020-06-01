@@ -43,6 +43,13 @@ const Login = ({loginUser, isLoggedIn}) => {
                 userId: res.data._id
             })
 
+            if (!localStorage.getItem('userEmail')) {
+                localStorage.setItem('userEmail', res.data.email);
+            }
+
+            if (!localStorage.getItem('fullName')) {
+                localStorage.setItem('fullName', res.data.firstName.concat(' ').concat(res.data.lastName));
+            }
 
 
         });

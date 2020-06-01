@@ -18,13 +18,19 @@ class ToastMessage extends Component {
         }
     }
 
-    componentWillReceiveProps(nextProps, nextContext) {
-        this.setState({
-            show: nextProps.showToast,
-            message: nextProps.message,
-            messageType: nextProps.messageType,
-            statusColor: nextProps.statusColor
-        });
+    static getDerivedStateFromProps(nextProps, prevState) {
+
+        if (nextProps !== prevState) {
+
+            return ({
+                show: nextProps.showToast,
+                message: nextProps.message,
+                messageType: nextProps.messageType,
+                statusColor: nextProps.statusColor
+            });
+        }
+
+        return null;
     }
 
     useStyles = () => makeStyles((theme) => ({
@@ -50,6 +56,34 @@ class ToastMessage extends Component {
                         <Alert onClose={() => {
                             this.props.showFunction(false)
                         }} severity="success">
+                            <AlertTitle>{this.state.messageType}</AlertTitle>
+                            <p>{this.state.message}</p>
+                        </Alert>
+                    </div>
+
+
+                );
+            } else if (this.state.statusColor === 'info') {
+                return (
+
+                    <div className={classes.root} id={this.props.tId}>
+                        <Alert onClose={() => {
+                            this.props.showFunction(false)
+                        }} severity="info">
+                            <AlertTitle>{this.state.messageType}</AlertTitle>
+                            <p>{this.state.message}</p>
+                        </Alert>
+                    </div>
+
+
+                );
+            } else if (this.state.statusColor === 'warning') {
+                return (
+
+                    <div className={classes.root} id={this.props.tId}>
+                        <Alert onClose={() => {
+                            this.props.showFunction(false)
+                        }} severity="warning">
                             <AlertTitle>{this.state.messageType}</AlertTitle>
                             <p>{this.state.message}</p>
                         </Alert>

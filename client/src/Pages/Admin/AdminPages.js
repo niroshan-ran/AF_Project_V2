@@ -37,10 +37,12 @@ function App() {
                                     <Route path="/product" component={CreateProduct}/>
                                     <Route path="/category" component={CreateCategory}/>
                                     <Route path="/newOrders" component={NewOrders}/>
-                                    <Route path="/cusFeedback" component={CusFeedback}/>
                                     <Route path="/sm_pages" component={SMPage}/>
                                     <Route path="/sm_register" component={RegisterSM}/>
                                     <Route path="/logout" component={Logout}/>
+                                </div>
+                                <div>
+                                    <Route path="/cusFeedback" component={CusFeedback}/>
                                 </div>
 
                             </div>

@@ -10,6 +10,7 @@ import ToastMessage from "./Components/ToastMessage";
 import Row from "react-bootstrap/Row";
 import Col from "react-bootstrap/Col";
 import "./Components/AlertStyles.css";
+import ConfirmDeleteFeedbackModal from "./Components/ConfirmDeleteFeedbackModal";
 
 class Feedback extends Component {
 
@@ -48,6 +49,8 @@ class Feedback extends Component {
             toastType: 'Error',
             typeColor: 'error'
         }
+
+
     }
 
     componentDidMount() {
@@ -58,6 +61,54 @@ class Feedback extends Component {
         this.setState({
             showToast: val
         })
+    }
+
+    onDeleteFeedback = (id) => {
+
+
+        fetch('http://localhost:4001/feedback/delete/' + id, {
+            method: 'DELETE'
+        }).then((response) => {
+
+
+            if (response.status === 200) {
+
+
+                this.setState({
+                    showToast: true,
+                    toastMessage: 'Feedback Deleted Successfully!!!',
+                    toastType: 'Information',
+                    typeColor: "success"
+                });
+
+                this.fetchData();
+
+            } else {
+
+                this.setState({
+                    showToast: true,
+                    toastMessage: "Unexpected Response Status " + response.status + " Occurred...",
+                    toastType: 'Error',
+                    typeColor: "error"
+                });
+            }
+        }).catch(() => {
+
+            this.setState({
+                showToast: true,
+                toastMessage: "Unexpected Issue Occurred...",
+                toastType: 'Error',
+                typeColor: "error"
+            });
+
+        });
+
+
+        setTimeout(() => this.setState({
+            showToast: false
+        }), 5000);
+
+
     }
 
     calculateAverageRating() {
@@ -74,7 +125,11 @@ class Feedback extends Component {
 
         });
 
-        return totalRating / nFeedbacks;
+        if (nFeedbacks > 0) {
+            return totalRating / nFeedbacks;
+        }
+
+        return 0;
 
 
     }
@@ -116,36 +171,81 @@ class Feedback extends Component {
         }
     }
 
-    fetchData = () => {
-        const url = "http://localhost:4001/feedback/";
+
+    setResponseErrorToast(response) {
+        this.setState({
+            showToast: true,
+            toastMessage: "Unexpected Response Status " + response.status + " Occurred...",
+            toastType: 'Error',
+            typeColor: "warning"
+        });
+    }
+
+    setErrorCatchToast() {
+        this.setState({
+            showToast: true,
+            toastMessage: "Unexpected Issue Occurred...",
+            toastType: 'Error',
+            typeColor: "error"
+        });
+    }
+
+
+    fetchData() {
+
+        let url = "";
+
+        if (localStorage.getItem('userEmail')) {
+
+            url = "http://localhost:4001/feedback/user/" + localStorage.getItem('userEmail');
+
+        } else {
+
+            url = "http://localhost:4001/feedback/";
+
+        }
+
         fetch(url).then(response => response.json())
             .then(json => this.setState({
-                feedbackList: json
-            }, () => {
+                    feedbackList: json
+                }, () => {
 
-                let sortedList = this.state.feedbackList;
+                    let sortedList = this.state.feedbackList;
 
-                sortedList.sort((a, b) => {
-                    return new Date(b.updatedAt) - new Date(a.updatedAt)
+                    sortedList.sort((a, b) => {
+                        return new Date(b.updatedAt) - new Date(a.updatedAt)
+                    })
+
+                    this.setState({
+                        feedbackList: sortedList
+                    })
+
+
                 })
-
-                this.setState({
-                    feedbackList: sortedList
-                })
-            })).catch(() => {
-            this.setState({
-                showToast: true,
-                toastMessage: "Unexpected Issue Occurred...",
-                toastType: 'Error',
-                typeColor: "error"
-            });
+            ).catch(() => {
+            this.setErrorCatchToast();
 
             setTimeout(() => {
                 this.setState({
                     showToast: false
                 })
             }, 5000);
+
+
         });
+
+        if (localStorage.getItem('userEmail') && localStorage.getItem('fullName')) {
+            this.setState({
+                feedback: {
+                    name: localStorage.getItem('fullName'),
+                    email: localStorage.getItem('userEmail'),
+                    rating: 1,
+                    comment: "",
+                    reply: ""
+                }
+            });
+        }
+
     }
 
     useStyles = () => makeStyles({
@@ -289,22 +389,12 @@ class Feedback extends Component {
                 this.fetchData();
 
             } else {
-                this.setState({
-                    showToast: true,
-                    toastMessage: "Unexpected Response Status " + r.status + " Occurred...",
-                    toastType: 'Error',
-                    typeColor: "error"
-                });
+                this.setResponseErrorToast(r);
 
             }
 
         }).catch(() => {
-            this.setState({
-                showToast: true,
-                toastMessage: "Unexpected Issue Occurred...",
-                toastType: 'Error',
-                typeColor: "error"
-            });
+            this.setErrorCatchToast();
         })
 
         setTimeout(() => {
@@ -318,6 +408,10 @@ class Feedback extends Component {
     render() {
 
         let feedbackList = this.state.feedbackList;
+
+        let average = this.calculateAverageRating();
+
+        let roundRating = this.roundAverageRating();
 
         return (
             <>
@@ -338,15 +432,27 @@ class Feedback extends Component {
                                     <Form onSubmit={(event) => this.onFeedbackPost(event)}>
                                         <Form.Group>
                                             <Form.Label>Your&nbsp;Name</Form.Label>
-                                            <Form.Control id="name" onChange={(event) => this.onChangeText(event)}
-                                                          type="text" placeholder="Enter your Name here..."
-                                                          required/>
+                                            {localStorage.getItem('fullName') ?
+                                                <Form.Control id="name" readOnly value={this.state.feedback.name}
+                                                              type="text" placeholder="Enter your Name here..."
+                                                              required/> :
+                                                <Form.Control id="name" onChange={(event) => this.onChangeText(event)}
+                                                              type="text" placeholder="Enter your Name here..."
+                                                              required/>
+                                            }
+
                                         </Form.Group>
                                         <Form.Group>
                                             <Form.Label>Email&nbsp;Address</Form.Label>
-                                            <Form.Control id="emailId" type="email"
-                                                          onChange={(event) => this.onChangeText(event)}
-                                                          placeholder="Enter your Email here.." required/>
+                                            {localStorage.getItem('userEmail') ?
+                                                <Form.Control id="emailId" type="email"
+                                                              readOnly value={this.state.feedback.email}
+                                                              placeholder="Enter your Email here.." required/> :
+                                                <Form.Control id="emailId" type="email"
+                                                              onChange={(event) => this.onChangeText(event)}
+                                                              placeholder="Enter your Email here.." required/>
+                                            }
+
                                             <Form.Text className="text-muted">
                                                 We'll never share your email with anyone else.
                                             </Form.Text>
@@ -379,7 +485,7 @@ class Feedback extends Component {
 
                                     <Card>
                                         <Card.Header as="h5">Overall&nbsp;Rating&nbsp;:&nbsp;
-                                            <strong>{this.calculateAverageRating().toFixed(2)}</strong></Card.Header>
+                                            <strong>{average > 0 ? average.toFixed(2) : 'No Rating'}</strong></Card.Header>
                                         <Card.Body>
 
                                             <div className={this.classes.root}>
@@ -387,12 +493,11 @@ class Feedback extends Component {
                                                     size="large"
                                                     max={7}
                                                     name="half-rating-read size-large"
-                                                    value={this.roundAverageRating()}
+                                                    value={roundRating}
                                                     precision={0.5}
                                                     readOnly
                                                 />
                                             </div>
-
 
                                         </Card.Body>
                                     </Card>
@@ -403,7 +508,7 @@ class Feedback extends Component {
 
                                     <Card>
                                         <Card.Header as="h5"
-                                                     id="feedbackHeader">Feedback&nbsp;from&nbsp;Users</Card.Header>
+                                                     id="feedbackHeader">Feedback&nbsp;from&nbsp;{localStorage.getItem('userEmail') ? 'You' : 'Users'}</Card.Header>
                                     </Card>
                                     <Card className="pt-0 overflow-auto" id="list">
                                         <Card.Body>
@@ -423,7 +528,7 @@ class Feedback extends Component {
                                                                         </div>
                                                                     </Card.Header>
                                                                     <Card.Body>
-                                                                        <div className="float-left w-100">
+                                                                        <div className="float-left">
 
                                                                             <Card.Title>{feedback.comment}</Card.Title>
 
@@ -452,6 +557,14 @@ class Feedback extends Component {
 
 
                                                                         </div>
+                                                                        {localStorage.getItem('userEmail') ?
+                                                                            <div className="float-right">
+
+                                                                                <ConfirmDeleteFeedbackModal
+                                                                                    onDeleteFeedback={this.onDeleteFeedback}
+                                                                                    feedbackId={feedback._id}/>
+                                                                            </div>
+                                                                            : <></>}
 
 
                                                                     </Card.Body>

@@ -43,6 +43,8 @@ const authReducer = (state = initialState,action) => {
             localStorage.removeItem('token');
             localStorage.removeItem('userType');
             localStorage.removeItem('userId');
+            localStorage.removeItem('userEmail');
+            localStorage.removeItem('fullName');
             return {
                 ...state,
                 isLoggedIn: false,
@@ -52,6 +54,8 @@ const authReducer = (state = initialState,action) => {
             localStorage.removeItem('token');
             localStorage.removeItem('userType');
             localStorage.removeItem('userId');
+            localStorage.removeItem('userEmail');
+            localStorage.removeItem('fullName');
             return {
                 ...state,
                 isLoggedIn: false

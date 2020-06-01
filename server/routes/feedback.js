@@ -27,6 +27,38 @@ router.route('/add').post((req, res) => {
         .catch(err => res.status(400).json('Error is: ' + err));
 });
 
+router.route('/user/:email').get((req, res) => {
+
+    const email = req.params.email;
+
+    Feedback.find({email: email})
+        .then(feedback => res.json(feedback))
+        .catch(err => res.status(400).json('Error is: ' + err));
+
+});
+
+router.route('/delete/:feedbackId').delete((req, res) => {
+
+    const feedbackId = req.params.feedbackId;
+
+    Feedback.deleteOne({_id: feedbackId})
+        .then(() => res.json('Feedback Deleted!'))
+        .catch(err => res.status(400).json('Error is: ' + err));
+
+});
+
+router.route('/search/:start/:end').get((req, res) => {
+
+    const startDate = req.params.start;
+    const endDate = req.params.end;
+
+    Feedback.find({"$and": [{createdAt: {"$gte": startDate}}, {createdAt: {"$lte": endDate}}]})
+        .then(feedback => res.json(feedback))
+        .catch(err => res.status(400).json('Error is: ' + err));
+
+
+});
+
 router.route('/:feedbackID').put((req, res) => {
 
     const ID = req.params.feedbackID;
@@ -41,7 +73,7 @@ router.route('/:feedbackID').put((req, res) => {
 
 
     Feedback.updateOne({_id: ID}, feedback)
-        .then(() => res.json('Feedback Posted!'))
+        .then(() => res.json('Replied to the Feedback!'))
         .catch(err => res.status(400).json('Error is: ' + err));
 
 })
