@@ -10,17 +10,6 @@ import Swal from "sweetalert2";
 const Login = ({loginUser, isLoggedIn}) => {
 
 
-
-    const loggedAlert = ()=>{
-        Swal.fire({
-            position: 'center',
-            icon: 'success',
-            title: 'You have successfully logged in',
-            showConfirmButton: false,
-            timer: 3000
-        })
-    }
-
     let [data, setData] = useState({
         email: '',
         password: ''
@@ -54,7 +43,6 @@ const Login = ({loginUser, isLoggedIn}) => {
 
         });
 
-        loggedAlert();
         switch (user.position) {
             case 'admin':
                 return <Redirect to="/admin"/>
@@ -95,6 +83,7 @@ const Login = ({loginUser, isLoggedIn}) => {
             fieldmissAlart();
         }else{
             loginUser(email, password);
+            //console.log(loginValue);
         }
 
     };

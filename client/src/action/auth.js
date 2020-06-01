@@ -13,6 +13,7 @@ import {
 import axios from 'axios';
 
 import {setToken} from "../setToken";
+import Swal from "sweetalert2";
 
 
 export const loadUser1 = () => {
@@ -60,9 +61,7 @@ export const loadUser = () => async dispatch => {
 export const loadSM = () => async dispatch => {
 
     if(localStorage.getItem('token')){
-
         setToken(localStorage.getItem('token'));
-
     }
 
     try{
@@ -141,6 +140,23 @@ export const registerSM = (firstName, lastName, position, email, password) => as
 
 }
 
+const invalidLogin = ()=>{
+    Swal.fire({
+        icon: 'error',
+        title: 'Oops...',
+        text: 'Please check your email and password!'
+    })
+}
+
+const loggedAlert = ()=>{
+    Swal.fire({
+        position: 'center',
+        icon: 'success',
+        title: 'You have successfully logged in',
+        showConfirmButton: false,
+        timer: 3000
+    })
+}
 
 
 export const loginUser = (email, password) => async dispatch => {
@@ -156,8 +172,10 @@ export const loginUser = (email, password) => async dispatch => {
 
         const body = JSON.stringify({email, password})
         const response1 = await axios.post('http://localhost:4001/api/users/login', body, config);
-            //.then(res => console.log(res.data));
-        //console.log("position: "+response1.data[1]);
+
+        if(response1.data !== undefined){
+            loggedAlert();
+        }
 
         dispatch({
             type: LOGIN_SUCCESS,
@@ -167,6 +185,9 @@ export const loginUser = (email, password) => async dispatch => {
         dispatch(loadUser());
 
     } catch (e) {
+        if(e){
+            invalidLogin();
+        }
 
         dispatch({
             type: LOGIN_FAIL,
