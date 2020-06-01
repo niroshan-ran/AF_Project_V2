@@ -14,6 +14,8 @@ import TextField from "@material-ui/core/TextField";
 import Button from "react-bootstrap/Button";
 import CardGroup from "react-bootstrap/CardGroup";
 import Fab from "@material-ui/core/Fab";
+import Checkbox from "@material-ui/core/Checkbox";
+import FormControlLabel from "@material-ui/core/FormControlLabel";
 
 
 class Feedback extends Component {
@@ -24,6 +26,8 @@ class Feedback extends Component {
 
         this.state = {
             feedbackList: [],
+            checkedFromBegin: false,
+            checkedToEnd: false,
             showModale: false,
             showToast: false,
             toastMessage: '',
@@ -146,40 +150,36 @@ class Feedback extends Component {
 
         event.preventDefault();
 
-        console.log(obj.feedback)
+        console.log(obj.newFeedback)
 
 
-        fetch("http://localhost:4001/feedback/" + obj.feedback._id, {
+        fetch("http://localhost:4001/feedback/" + obj.newFeedback._id, {
             method: 'PUT',
             headers: {
                 'Accept': 'application/json',
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify(obj.feedback)
+            body: JSON.stringify(obj.newFeedback)
         }).then((r) => {
 
-            this.setState({
-                showModale: false
-            }, () => {
 
-                if (r.status === 200) {
-                    this.setState({
-                        showToast: true,
-                        toastMessage: 'Replied to the Feedback!!!',
-                        toastType: 'Information',
-                        typeColor: "success"
-                    })
+            if (r.status === 200) {
+                this.setState({
+                    showToast: true,
+                    toastMessage: 'Replied to the Feedback!!!',
+                    toastType: 'Information',
+                    typeColor: "success"
+                })
 
-                    this.fetchData();
-                } else {
-                    this.setState({
-                        showToast: true,
-                        toastMessage: "Unexpected Response Status " + r.status + " Occurred...",
-                        toastType: 'Error',
-                        typeColor: "warning"
-                    });
-                }
-            })
+                this.fetchData();
+            } else {
+                this.setState({
+                    showToast: true,
+                    toastMessage: "Unexpected Response Status " + r.status + " Occurred...",
+                    toastType: 'Error',
+                    typeColor: "warning"
+                });
+            }
 
 
         }).catch(() => {
@@ -202,7 +202,18 @@ class Feedback extends Component {
 
         event.preventDefault();
 
-        fetch("http://localhost:4001/feedback/search/" + this.state.dateRange.startDate + "/" + this.state.dateRange.endDate, {
+        let startDate = this.state.dateRange.startDate;
+        let endDate = this.state.dateRange.endDate;
+
+        if (this.state.checkedFromBegin) {
+            startDate = new Date('1970-01-01T00:00');
+        }
+
+        if (this.state.checkedToEnd) {
+            endDate = new Date();
+        }
+
+        fetch("http://localhost:4001/feedback/search/" + startDate + "/" + endDate, {
             method: 'GET'
         }).then(response => response.json())
             .then(json => this.setState({
@@ -228,7 +239,9 @@ class Feedback extends Component {
                             showToast: true,
                             toastMessage: 'Results Found!!!',
                             toastType: 'Information',
-                            typeColor: "success"
+                            typeColor: "success",
+                            checkedFromBegin: false,
+                            checkedToEnd: false
                         })
 
 
@@ -240,7 +253,9 @@ class Feedback extends Component {
                             showToast: true,
                             toastMessage: 'No Results!!!',
                             toastType: 'Information',
-                            typeColor: "info"
+                            typeColor: "info",
+                            checkedFromBegin: false,
+                            checkedToEnd: false,
                         })
                     }
                 })
@@ -275,6 +290,21 @@ class Feedback extends Component {
 
         const feedbackList = this.state.feedbackList;
 
+        const handleChange = (event) => {
+
+            switch (event.target.id) {
+                case "checkBegin":
+                    this.setState({checkedFromBegin: event.target.checked});
+                    break;
+                case "checkEnd":
+                    this.setState({checkedToEnd: event.target.checked});
+                    break;
+                default:
+                    break;
+
+            }
+
+        };
 
         return (
 
@@ -298,53 +328,125 @@ class Feedback extends Component {
                                 <Card.Title className="m-xl-5">Search&nbsp;by&nbsp;Date/Time&nbsp;Range</Card.Title>
                             </Card>
                             <Card>
-                                <FormControl className="m-xl-5">
-                                    <TextField
-                                        id="start datetime-local"
-                                        label="Start Date/Time"
-                                        type="datetime-local"
-                                        required
-                                        onChange={(event) => this.setState({
-                                            dateRange: {
-                                                startDate: event.target.value,
-                                                endDate: this.state.dateRange.endDate
-                                            }
+                                <div className="ml-xl-5 mr-xl-5 mt-xl-3 mb-xl-3">
+                                    <FormControl>
+                                        <FormControlLabel
+                                            control={
+                                                <Checkbox id="checkBegin"
+                                                          checked={this.state.checkedFromBegin}
+                                                          onChange={handleChange}
 
-                                        }, () => {
-                                            console.log(this.state.dateRange.startDate.toString())
-                                        })}
-                                        className={classes.textField}
-                                        InputLabelProps={{
-                                            shrink: true,
-                                        }}
-                                    />
-                                </FormControl>
+                                                          color="primary"
+                                                />
+                                            }
+                                            label="From Earliest"
+                                        />
+                                    </FormControl>
+                                    <FormControl>
+                                        {this.state.checkedFromBegin !== true ?
+
+                                            <TextField
+                                                id="start datetime-local"
+                                                label="Start Date/Time"
+                                                type="datetime-local"
+                                                required
+                                                onChange={(event) => this.setState({
+                                                    dateRange: {
+                                                        startDate: event.target.value,
+                                                        endDate: this.state.dateRange.endDate
+                                                    }
+
+                                                }, () => {
+                                                    console.log(this.state.dateRange.startDate.toString())
+                                                })}
+                                                className={classes.textField}
+                                                InputLabelProps={{
+                                                    shrink: true,
+                                                }}
+                                            />
+
+                                            :
+
+                                            <TextField
+                                                id="start datetime-local"
+                                                label="Start Date/Time"
+                                                type="datetime-local"
+                                                disabled
+                                                className={classes.textField}
+                                                InputLabelProps={{
+                                                    shrink: true,
+                                                }}
+                                            />
+
+                                        }
+                                    </FormControl>
+                                </div>
+
                             </Card>
                             <Card>
-                                <FormControl className="m-xl-5">
-                                    <TextField
-                                        id="end datetime-local"
-                                        label="End Date/Time"
-                                        type="datetime-local"
-                                        required
-                                        onChange={(event) => this.setState({
-                                            dateRange: {
-                                                startDate: this.state.dateRange.startDate,
-                                                endDate: event.target.value
+
+                                <div className="ml-xl-5 mr-xl-5 mt-xl-3 mb-xl-3">
+                                    <FormControl>
+                                        <FormControlLabel
+                                            control={
+                                                <Checkbox id="checkEnd"
+                                                          checked={this.state.checkedToEnd}
+                                                          onChange={handleChange}
+
+                                                          color="primary"
+                                                />
                                             }
-                                        }, () => {
-                                            console.log(this.state.dateRange.endDate.toString())
-                                        })}
-                                        className={classes.textField}
-                                        InputLabelProps={{
-                                            shrink: true,
-                                        }}
-                                    />
-                                </FormControl>
+                                            label="Till Most Recent"
+                                        />
+                                    </FormControl>
+                                    <FormControl>
+                                        {this.state.checkedToEnd !== true ?
+
+                                            <TextField
+                                                id="end datetime-local"
+                                                label="End Date/Time"
+                                                type="datetime-local"
+                                                required
+                                                onChange={(event) => this.setState({
+                                                    dateRange: {
+                                                        startDate: this.state.dateRange.startDate,
+                                                        endDate: event.target.value
+                                                    }
+                                                }, () => {
+                                                    console.log(this.state.dateRange.endDate.toString())
+                                                })}
+                                                className={classes.textField}
+                                                InputLabelProps={{
+                                                    shrink: true,
+                                                }}
+                                            />
+
+                                            :
+
+                                            <TextField
+                                                id="end datetime-local"
+                                                label="End Date/Time"
+                                                type="datetime-local"
+                                                disabled
+                                                className={classes.textField}
+                                                InputLabelProps={{
+                                                    shrink: true,
+                                                }}
+                                            />
+
+                                        }
+                                    </FormControl>
+                                </div>
+
 
                             </Card>
                             <Card>
-                                <Button className="m-xl-5 btn" variant="primary" type="submit">Search</Button>
+                                <div className="ml-xl-5 mr-xl-5">
+                                    <Button className="btn btn-block" variant="secondary" type="button"
+                                            onClick={() => this.fetchData()}>Refresh</Button>
+                                    <Button className="btn btn-block" variant="primary" type="submit">Search</Button>
+                                </div>
+
                             </Card>
                         </CardGroup>
 
@@ -398,9 +500,7 @@ class Feedback extends Component {
                                         </div>
                                         <div className="float-right flex-row w-25 text-center">
 
-                                            <ReplyModal showModal={this.state.showModale}
-                                                        onReplySubmit={this.onReplySubmit}
-                                                        feedbackObj={feedback}/>
+                                            <ReplyModal onReplySubmit={this.onReplySubmit} feedbackObj={feedback}/>
 
                                         </div>
 

@@ -12,27 +12,41 @@ class ReplyModal extends Component {
         this.state = {
             feedback: {},
             show: false,
-
+            newFeedback: {
+                _id: undefined,
+                name: "",
+                email: "",
+                rating: 0,
+                comment: "",
+                reply: ""
+            }
         }
     }
 
+
     static getDerivedStateFromProps(nextProps, prevState) {
 
-        if (nextProps !== prevState) {
+        if (nextProps.feedbackObj !== prevState.feedback) {
             return ({
-                show: nextProps.showModale,
                 feedback: nextProps.feedbackObj
             });
         }
 
         return null;
-
     }
 
 
     handleClose = () => this.setState({
         show: false,
-        feedback: this.props.feedbackObj
+        feedback: this.props.feedbackObj,
+        newFeedback: {
+            _id: undefined,
+            name: "",
+            email: "",
+            rating: 0,
+            comment: "",
+            reply: ""
+        }
     });
     handleShow = () => this.setState({
         show: true
@@ -40,7 +54,7 @@ class ReplyModal extends Component {
 
     onChangeText(event) {
         this.setState({
-            feedback: {
+            newFeedback: {
                 _id: this.state.feedback._id,
                 name: this.state.feedback.name,
                 email: this.state.feedback.email,
@@ -49,10 +63,9 @@ class ReplyModal extends Component {
                 reply: event.target.value
             }
         }, () => {
-            console.log(this.state.feedback.reply);
+            console.log(this.state.newFeedback.reply);
         });
     }
-
 
 
     render() {
@@ -65,7 +78,12 @@ class ReplyModal extends Component {
                 </Button>
 
                 <Modal show={this.state.show} onHide={this.handleClose}>
-                    <Form onSubmit={(event) => this.props.onReplySubmit(event, this.state)}>
+                    <Form onSubmit={(event) => {
+                        this.setState({
+                            show: false
+                        });
+                        this.props.onReplySubmit(event, this.state);
+                    }}>
                         <Modal.Header closeButton>
                             <Modal.Title>Reply&nbsp;to&nbsp;Feedback</Modal.Title>
                         </Modal.Header>
@@ -74,13 +92,14 @@ class ReplyModal extends Component {
                             <Form.Group>
                                 <Form.Label>Comment&nbsp;ID</Form.Label>
                                 <Form.Control type="text"
-                                              value={this.state.feedback._id} required readOnly/>
+                                              defaultValue={this.state.feedback._id} required readOnly/>
                             </Form.Group>
                             <Form.Group>
                                 <Form.Label>Reply&nbsp;Comment</Form.Label>
                                 <Form.Control as="textarea" rows="2" type="text"
                                               onChange={(event) => this.onChangeText(event)}
-                                              value={this.state.feedback.reply} placeholder="Enter your Reply here.."
+                                              defaultValue={this.state.feedback.reply}
+                                              placeholder="Enter your Reply here.."
                                               required/>
 
                             </Form.Group>
