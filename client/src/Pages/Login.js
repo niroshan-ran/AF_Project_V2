@@ -5,10 +5,11 @@ import {Redirect} from "react-router-dom";
 import '../CSS/login.css';
 import Header from "./Header";
 import Swal from "sweetalert2";
-//import Register from "./Register";
 
 
 const Login = ({loginUser, isLoggedIn}) => {
+
+
 
     const loggedAlert = ()=>{
         Swal.fire({
@@ -35,7 +36,6 @@ const Login = ({loginUser, isLoggedIn}) => {
 
 
     if (isLoggedIn) {
-        // loggedAlert();
 
         loadUser1().then((res) => {
             setUser({
@@ -54,10 +54,11 @@ const Login = ({loginUser, isLoggedIn}) => {
 
         });
 
-
+        loggedAlert();
         switch (user.position) {
             case 'admin':
                 return <Redirect to="/admin"/>
+
             case 'sm':
                 return <Redirect to="/admin"/>
             case 'user':
