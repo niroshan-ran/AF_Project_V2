@@ -40,15 +40,18 @@ class Feedback extends Component {
 
         }
 
-        window.onscroll = () => {
-            this.scrollFunction()
-        };
+
     }
 
     componentDidMount() {
         this.fetchData();
+
+        window.addEventListener('scroll', this.scrollFunction);
     }
 
+    componentWillUnmount() {
+        window.removeEventListener('scroll', this.scrollFunction);
+    }
 
     labels = {
 
