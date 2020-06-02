@@ -1,6 +1,7 @@
 import {
     ADD_TO_CART_USER,
-    AUTH_ERROR, AUTH_USER,
+    AUTH_ERROR,
+    AUTH_USER,
     LOAD_SM,
     LOAD_USER,
     LOG_OUT,
@@ -176,6 +177,7 @@ export const loginUser = (email, password) => async dispatch => {
         if(response1.data !== undefined){
             loggedAlert();
         }
+
 
         dispatch({
             type: LOGIN_SUCCESS,
