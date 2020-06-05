@@ -1,32 +1,19 @@
 import React from "react";
 import {connect} from "react-redux";
 import {logOut} from "../../action/auth";
-//import { Redirect } from "react-router-dom";
-
-
+import Swal from "sweetalert2";
 
 
 const AdminLogout = ({isLoggedIn,logOut}) => {
 
     return (
         <div>
-                <h1>Admin Logout</h1>
                 {
                     isLoggedIn ? (
-
-                            <div>
-                                <h1>You are logged in</h1>
-                                <br/>
-
-                                <button onClick={() => logOut()}>
-                                    Log out
-                                </button>
-                            </div>
+                            logoutAlert(logOut)
                         ) :
                         (
-                            <div>
-                                {window.location="/"}
-                            </div>
+                                    window.location = ""
                         )
                 }
 
@@ -34,6 +21,21 @@ const AdminLogout = ({isLoggedIn,logOut}) => {
     );
 }
 
+const logoutAlert = (logOut) =>{
+    Swal.fire({
+        title: 'Are you sure?',
+        text: "Do you want to log out!",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#3085d6',
+        cancelButtonColor: '#d33',
+        confirmButtonText: 'Yes, I want!'
+    }).then((result) => {
+        if (result.value) {
+            logOut()
+        }
+    })
+}
 
 const mapStateToProps = state => ({
     isLoggedIn: state.isLoggedIn
