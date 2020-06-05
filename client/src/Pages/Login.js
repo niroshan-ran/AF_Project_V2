@@ -10,6 +10,7 @@ import Swal from "sweetalert2";
 const Login = ({loginUser, isLoggedIn}) => {
 
 
+
     let [data, setData] = useState({
         email: '',
         password: ''
@@ -79,12 +80,13 @@ const Login = ({loginUser, isLoggedIn}) => {
 
     const submitData = () => {
 
-        if(email==="" ||password===""){
+        if (email === "" || password === "") {
             fieldmissAlart();
-        }else{
+        } else {
             loginUser(email, password);
             //console.log(loginValue);
         }
+
 
     };
 
@@ -131,7 +133,7 @@ const Login = ({loginUser, isLoggedIn}) => {
 
                         <button type="submit"
                                 className="btn btn-primary"
-                                onClick={() => submitData()}>Submit
+                                onClick={() => submitData()}>Login
                         </button>
 
 
