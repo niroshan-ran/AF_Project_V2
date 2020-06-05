@@ -9,6 +9,7 @@ import Fab from "@material-ui/core/Fab";
 import {useHistory} from "react-router-dom";
 
 import "./Components/AlertStyles.css";
+import CircularProgress from "@material-ui/core/CircularProgress";
 
 
 let CartView = (props) => {
@@ -19,6 +20,7 @@ let CartView = (props) => {
     let [userID, setUserID] = useState('');
     let [myCart, setMyCart] = useState([]);
     let [totQuantity, setTotQuantity] = useState(0);
+    let [isLoading, setLoad] = useState(true);
 
 
     let addToCarthandler = (product) => {
@@ -33,9 +35,10 @@ let CartView = (props) => {
     useEffect(() => {
         setUserID(props.match.params.user);
         console.log("This is user id :" + props.match.params.user);
-
+        setLoad(true);
         axios.get('http://localhost:4001/cart/')
             .then(response => {
+                setLoad(false);
                 setProducts(response.data);
 
             })
@@ -87,11 +90,13 @@ let CartView = (props) => {
         <div>
             <LogedinHeader myCart={myCart} totQuantity={totQuantity}
                            userID={userID}/>
-            <div className="container">
-                <div className="row">
-                    {productList()}
+            {isLoading ? <div className="text-center"><CircularProgress id="spinner"/></div> :
+                <div className="container">
+                    <div className="row">
+                        {productList()}
+                    </div>
                 </div>
-            </div>
+            }
 
             <Fab color="primary" aria-label="add" id="myBtn2" onClick={viewCart}>
                 <i className="fa fa-shopping-cart fa-2x"/>
