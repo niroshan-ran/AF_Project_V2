@@ -3,13 +3,15 @@ import Header from "./Header";
 import "../CSS/allproduct.css"
 import axios from "axios";
 import $ from "jquery";
+import LinearProgress from '@material-ui/core/LinearProgress';
 
 class AllProduct extends Component {
 
     constructor(props) {
         super(props);
         this.state = {
-            products: []
+            products: [],
+            loading: true
         };
         this.productList = this.productList.bind(this);
     }
@@ -18,7 +20,10 @@ class AllProduct extends Component {
 
         axios.get('http://localhost:4001/product/')
             .then(response => {
-                this.setState({products :response.data})
+                this.setState({
+                    products :response.data,
+                    loading :false
+                })
                 console.log(this.state.products);
             })
             .catch(error => {
@@ -105,12 +110,13 @@ class AllProduct extends Component {
                 <Header/>
 
                 <div className="p-3 mb-2 bg-dark text-light text-center"><h1>{this.props.match.params.name}</h1></div>
-                <div className="container-xl d-flex justify-content-center">
-                    <div className="row">
-                       {this.productList()}
+                {this.state.loading ? <LinearProgress /> :
+                    <div className="container-xl d-flex justify-content-center">
+                        <div className="row">
+                            {this.productList()}
+                        </div>
                     </div>
-                </div>
-
+                }
             </div>
         );
     }

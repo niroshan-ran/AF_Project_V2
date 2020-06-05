@@ -16,6 +16,7 @@ import CardGroup from "react-bootstrap/CardGroup";
 import Fab from "@material-ui/core/Fab";
 import Checkbox from "@material-ui/core/Checkbox";
 import FormControlLabel from "@material-ui/core/FormControlLabel";
+import LinearProgress from '@material-ui/core/LinearProgress';
 
 
 class Feedback extends Component {
@@ -36,7 +37,8 @@ class Feedback extends Component {
             dateRange: {
                 startDate: new Date(),
                 endDate: new Date()
-            }
+            },
+            loading: true
 
         }
 
@@ -80,7 +82,8 @@ class Feedback extends Component {
         const url = "http://localhost:4001/feedback/";
         fetch(url).then(response => response.json())
             .then(json => this.setState({
-                feedbackList: json
+                feedbackList: json,
+                loading :false
             }, () => {
 
                 let sortedList = this.state.feedbackList;
@@ -459,6 +462,8 @@ class Feedback extends Component {
                 <hr/>
 
                 {
+                    this.state.loading ? <LinearProgress color="secondary"/> :
+
                     feedbackList.map((feedback, index) => (
                         <div key={index}>
                             <div className="mr-xl-5 ml-xl-5">

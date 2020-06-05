@@ -2,6 +2,8 @@ import React, {Component} from 'react';
 import {Link} from 'react-router-dom';
 import axios from "axios";
 import Swal from "sweetalert2";
+import LinearProgress from '@material-ui/core/LinearProgress';
+
 
 const Product = props =>(
     <tr>
@@ -30,7 +32,8 @@ export default class ProductList extends Component {
         this.deleteProduct = this.deleteProduct.bind(this);
 
         this.state ={
-            product :[]
+            product :[],
+            loading: true
         };
     }
 
@@ -39,7 +42,9 @@ export default class ProductList extends Component {
         axios.get("http://localhost:4001/product/")
             .then(response => {
                 this.setState({
-                    product : response.data})
+                    product : response.data,
+                    loading :false
+                })
             })
             .catch((error)=>{
               console.log(error);
@@ -88,8 +93,9 @@ export default class ProductList extends Component {
         return (
             <div>
                 <h1>Products Table</h1><br/>
-                <table className="table">
-                    <thead className="thead-light">
+                {this.state.loading ? <LinearProgress color="secondary"/> :
+                    <table className="table">
+                        <thead className="thead-light">
                         <tr>
                             <th>Image</th>
                             <th>Product Name</th>
@@ -101,11 +107,13 @@ export default class ProductList extends Component {
                             <th>Updated at</th>
                             <th>Actions</th>
                         </tr>
-                    </thead>
-                    <tbody>
-                    {this.productList()}
-                    </tbody>
-                </table>
+                        </thead>
+                        <tbody>
+                        {this.productList()}
+                        </tbody>
+                    </table>
+
+                }
             </div>
 
         );
