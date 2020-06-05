@@ -45,6 +45,7 @@ const authReducer = (state = initialState,action) => {
             localStorage.removeItem('userId');
             localStorage.removeItem('userEmail');
             localStorage.removeItem('fullName');
+            localStorage.removeItem('admin');
             return {
                 ...state,
                 isLoggedIn: false,
@@ -56,6 +57,7 @@ const authReducer = (state = initialState,action) => {
             localStorage.removeItem('userId');
             localStorage.removeItem('userEmail');
             localStorage.removeItem('fullName');
+            localStorage.removeItem('admin');
             return {
                 ...state,
                 isLoggedIn: false

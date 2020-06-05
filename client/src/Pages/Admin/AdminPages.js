@@ -38,7 +38,9 @@ function App() {
                                     <Route path="/category" component={CreateCategory}/>
                                     <Route path="/newOrders" component={NewOrders}/>
                                     <Route path="/sm_pages" component={SMPage}/>
-                                    <Route path="/sm_register" component={RegisterSM}/>
+                                    {localStorage.getItem("admin") ?
+                                        <Route path="/sm_register" component={RegisterSM}/> : <></>}
+
                                     <Route path="/logout" component={Logout}/>
                                 </div>
                                 <div>

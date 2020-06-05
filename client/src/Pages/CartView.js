@@ -16,7 +16,7 @@ let CartView = (props) => {
 
 
     let [products, setProducts] = useState([]);
-    let [user, setUser] = useState(loginUser)
+    let [user, setUser] = useState(loginUser);
     let [userID, setUserID] = useState('');
     let [myCart, setMyCart] = useState([]);
     let [totQuantity, setTotQuantity] = useState(0);

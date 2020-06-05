@@ -24,9 +24,10 @@ export default class Navbar extends Component {
                             <li className="navbar-item">
                                 <Link to="/cusFeedback" className="nav-link">Customer Feedback</Link>
                             </li>
-                            <li className="navbar-item">
-                                <Link to="/sm_register" className="nav-link">Add Store Manager</Link>
-                            </li>
+                            {localStorage.getItem("admin") ?
+                                <li className="navbar-item">
+                                    <Link to="/sm_register" className="nav-link">Add Store Manager</Link>
+                                </li> : <></>}
                             <li className="navbar-item">
                                 <Link to="/logout" className="nav-link">logout</Link>
                             </li>

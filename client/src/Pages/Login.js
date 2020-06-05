@@ -46,6 +46,9 @@ const Login = ({loginUser, isLoggedIn}) => {
 
         switch (user.position) {
             case 'admin':
+                if (!localStorage.getItem('admin')) {
+                    localStorage.setItem('admin', "true");
+                }
                 return <Redirect to="/admin"/>
 
             case 'sm':
