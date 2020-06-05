@@ -1,14 +1,14 @@
 import React from "react";
-import Header from "./Header";
 import {Card} from "react-bootstrap";
 import Container from "react-bootstrap/Container";
+import LogedinHeader from "./LogedInHeader";
 //import {Link} from "react-router-dom";
 
 
 const ContactUs = () => {
     return (
         <>
-            <Header/>
+            <LogedinHeader/>
             <Container>
                 <Card>
                     <Card.Header><h1>About&nbsp;Us</h1></Card.Header>

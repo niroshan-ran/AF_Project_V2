@@ -1,5 +1,4 @@
 import React, {Component} from "react";
-import Header from "./Header";
 import Form from "react-bootstrap/Form";
 import {makeStyles} from '@material-ui/core/styles';
 import Box from "@material-ui/core/Box";
@@ -11,6 +10,7 @@ import Row from "react-bootstrap/Row";
 import Col from "react-bootstrap/Col";
 import "./Components/AlertStyles.css";
 import ConfirmDeleteFeedbackModal from "./Components/ConfirmDeleteFeedbackModal";
+import LogedinHeader from "./LogedInHeader";
 
 class Feedback extends Component {
 
@@ -415,7 +415,7 @@ class Feedback extends Component {
 
         return (
             <>
-                <Header/>
+                <LogedinHeader/>
                 <div className="fixed-top w-100" id="toastMessage">
                     <ToastMessage tId={"general"} showFunction={this.setShow} showToast={this.state.showToast}
                                   message={this.state.toastMessage} messageType={this.state.toastType}

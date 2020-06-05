@@ -323,6 +323,8 @@ export function auth() {
 
 export const logOut = () => async dispatch =>{
     dispatch({
-        type:LOG_OUT,
-    })
+        type: LOG_OUT,
+    });
+
+    window.location = "http://localhost:3000/";
 }
