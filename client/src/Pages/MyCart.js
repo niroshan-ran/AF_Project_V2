@@ -14,7 +14,7 @@ export default class MyCart extends Component {
         this.handleCheckOut = this.handleCheckOut.bind(this);
         this.state = {
             user:loginUser,
-            userID:this.props.location.userID,
+            userID:this.props.location.state.userID,
             myCart:this.props.location.state.myCart,
             totQuantity:this.props.location.totQuantity,
             totalAmount:0
