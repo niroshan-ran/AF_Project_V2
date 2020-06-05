@@ -4,10 +4,28 @@ import {logOut} from "../action/auth";
 import logo from '../Images/logo.jpg';
 import 'font-awesome/css/font-awesome.css';
 import {connect} from "react-redux";
-import {Redirect} from "react-router-dom";
+import {Link, Redirect,useHistory } from "react-router-dom";
 
 
-const LogedinHeader = ({isLoggedIn,logOut}) => {
+const LogedinHeader = ({isLoggedIn,logOut,myCart,totQuantity,userID}) => {
+
+    const history =  useHistory();
+
+    const viewCart =() =>{
+        console.log('this is from view cart redirect');
+        let path = `/MyCart`;
+        history.push({
+            pathname:path,
+            state:{
+                userID:userID,
+                myCart:myCart,
+                totQuantity:totQuantity
+            }
+        });
+    }
+    console.log('from header');
+    console.log(myCart);
+
     return (
         isLoggedIn ? (
         <div className="container-parent2">
@@ -61,12 +79,12 @@ const LogedinHeader = ({isLoggedIn,logOut}) => {
                         </ul>
 
                         <ul className="navbar-nav navbar-right">
-                            <li className="nav-item active">
-                                <a className="nav-link" href="/contact-us"><i className="fa fa-shopping-cart fa-2x" /> <span className="Badge">{}</span>Shopping Cart <span className="sr-only">(current)</span></a>
+                                <li className="nav-item active"  onClick={viewCart}>
+                                <a className="nav-link" ><i className="fa fa-shopping-cart fa-2x" />
+                                <span className="badge-success badge-pill">{totQuantity}</span>
+                                <span className="sr-only">(current)</span></a>
                             </li>
-                            <li className="nav-item active">
-                                <a className="nav-link" href="/contact-us"><i className="fa fa-list fa-2x" /> Wishlist <span className="sr-only">(current)</span></a>
-                            </li>
+
                             <li className="nav-item active">
                                 <a className="nav-link" onClick={() => logOut()}><i className="fa fa-user fa-2x" /> Logout <span className="sr-only">(current)</span></a>
                             </li>
@@ -84,6 +102,7 @@ const LogedinHeader = ({isLoggedIn,logOut}) => {
             )
     );
 }
+
 
 const mapStateToProps = state => ({
     isLoggedIn: state.isLoggedIn

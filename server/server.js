@@ -21,7 +21,7 @@ app.use(bodyParser.urlencoded({
 
 app.use('/api/users', require('./routes/users'));
 app.use('/api/store_manager', require('./routes/storemanagers'));
-app.use('/api/cart', require('./routes/cart'));
+//app.use('/cart', require('./routes/cart'));
 
 const categoryRouter = require('./routes/category');
 const productRouter = require('./routes/product');

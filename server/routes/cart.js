@@ -85,4 +85,22 @@ router.post("/addToCart",auth, (req,res) => {
     })
 })
 
+router.route('/add').post((req, res) =>{
+    const CUser = req.body.CUser;
+    const CProduct = req.body.CProduct;
+    const CQuantity = req.body.CQuantity;
+    const CAmount = req.body.CAmount;
+
+    const newCart = new Cart({
+        CUser,
+        CProduct,
+        CQuantity,
+        CAmount
+    });
+
+    newCart.save()
+        .then(() => res.json('Check Out Added !!'))
+        .catch(err => res.status(400).json('Error is: ' + err));
+});
+
 module.exports = router;

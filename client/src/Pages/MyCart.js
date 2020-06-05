@@ -1,119 +1,121 @@
-import React, {useEffect, useState} from "react";
+import React, {Component} from "react";
 import axios from "axios";
-import {loadUser1, logOut} from "../action/auth";
-import Redirect from "react-router-dom/es/Redirect";
+import {loadUser1, loginUser, logOut} from "../action/auth";
 import logo from "../Images/logo.jpg";
-import {connect} from "react-redux";
 import 'font-awesome/css/font-awesome.css';
-import { Menu, Icon, Badge } from 'antd';
+import LogedinHeader from "./LogedInHeader";
+import Swal from "sweetalert2";
 
 
-function MyCart(props) {
+export default class MyCart extends Component {
+    constructor(props) {
+        super(props);
 
-    const Cart = this.props.location.state.myCart;
-
-    const viewCart =() =>{
-        return <Redirect to={{
-            pathname: '/MyCart',
-        }}
-        />
+        this.handleCheckOut = this.handleCheckOut.bind(this);
+        this.state = {
+            user:loginUser,
+            userID:this.props.location.state.userID,
+            myCart:this.props.location.state.myCart,
+            totQuantity:this.props.location.totQuantity,
+            totalAmount:0
+        };
+        //this.productList = this.productList.bind(this);
+        //const prevState = this.props.location.state
     }
-        const items = this.props.map((Cart, index) => {
-            return <div className="col-sm-6 col-md-4 mb-3" key={index}>
-                <div className="row">
-                    <img src={Cart.product.PImage} className="img-responsive" alt="logo"/>
+
+    RemoveFromCarthandler = (product) => {
+        const filteredItems = this.state.myCart.filter(item => item._id !== product)
+        this.setState({
+            myCart: filteredItems
+        });
+    }
+
+    totalQuantity(){
+        let Qty = this.state.myCart.length;
+        //this.setState({totQuantity:Qty})
+        return(<h4>Total Quantity         : {Qty}</h4>);
+        console.log(Qty);
+    }
+
+    totalAmount(){
+        var sum = 0;
+        this.state.myCart.forEach(function(obj){
+            sum += obj.PPrice;
+        });
+        //this.setState({totalAmount:sum})
+        return(<h4>Total Amount To Pay   : Rs {sum}</h4>);
+    }
+
+    confirmAlart(){
+        Swal.fire(
+            'Thank You!',
+            'Checked Out Successfully',
+            'success'
+        )
+    }
+
+    handleCheckOut(e){
+        e.preventDefault();
+        var sum = 0;
+        this.state.myCart.forEach(function(obj){
+            sum += obj.PPrice;
+        });
+        const cart = {
+            CUser : this.state.userID,
+            CProduct : this.state.myCart,
+            CQuantity : this.state.myCart.length,
+            CAmount : sum
+        }
+
+        console.log(cart);
+
+        axios.post('http://localhost:4001/cart/add', cart)
+            .then(res => {
+                    console.log(res.data);
+                    this.confirmAlart();
+                }
+            );
+
+    }
+
+    productList(){
+        const mystyle = {
+            width: "100px",
+            height: "150px"
+        };
+        //return this.props.location.state.myCart.map((product,i) =>(
+        return this.state.myCart.map((product,i) =>(
+            <div className="d-flex flex-row " key={i}>
+
+                    <img src={product.PImage} className="mh-50" style={mystyle} alt="logo"/>
+
                     <div className="figure-caption ml-3">
-                        <h3>{Cart.product.PName}</h3>
+                        <h3>{product.PName}</h3>
+                        <h4>Rs {product.PPrice}</h4>
+                        <button type="button" className="btn btn-danger" onClick={() => this.RemoveFromCarthandler(product._id)}>Remove From Cart</button>
                         <div className="clearfix">
-                            <div className="pull-left"
-                                 style={{fontWeight: "bold", fontSize: "16px"}}>Rs {Cart.product.PPrice}</div>
                         </div>
                     </div>
-                </div>
+
             </div>
-        })
+    ));
+    }
 
-
-
-        return (
+    render() {
+        const hrStyle={border: "1px solid red"}
+        return(
             <div>
-                <div className="container-parent2">
-
-                    <div className="container-child">
-                        <img src={logo}
-                             alt="logo"/>
-                    </div>
-
-                    <div className="nav-header">
-                        <nav className="navbar navbar-expand-lg navbar-light bg-light">
-                            <a className="navbar-brand" href="/">Titans Online Fashion Store</a>
-                            <button className="navbar-toggler" type="button" data-toggle="collapse"
-                                    data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent"
-                                    aria-expanded="false" aria-label="Toggle navigation">
-
-                            </button>
-
-                            <div className="collapse navbar-collapse" id="navbarSupportedContent">
-                                <ul className="navbar-nav mr-auto">
-                                    <li className="nav-item active">
-                                        <a className="nav-link" href="/">Home <span className="sr-only">(current)</span></a>
-                                    </li>
-
-                                    <li className="nav-item dropdown">
-                                        <a className="nav-link dropdown-toggle" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                            Category
-                                        </a>
-                                        <div className="dropdown-menu" aria-labelledby="navbarDropdown">
-                                            <a className="dropdown-item" href="/">Trousers</a>
-                                            <a className="dropdown-item" href="/">T-Shirt</a>
-                                            <a className="dropdown-item" href="/">Shorts</a>
-                                            <a className="dropdown-item" href="/">Shoes</a>
-                                            <div className="dropdown-divider"/>
-                                            <a className="dropdown-item" href="/">Cosmetics</a>
-                                            <a className="dropdown-item" href="/">Blouses</a>
-                                            <a className="dropdown-item" href="/">Frocks</a>
-                                            <a className="dropdown-item" href="/">Skirts</a>
-                                            <a className="dropdown-item" href="/">Trouser-Female</a>
-                                            <a className="dropdown-item" href="/">Shoes</a>
-                                        </div>
-                                    </li>
-
-                                    <li className="nav-item active">
-                                        <a className="nav-link" href="/feedback">Feedback</a>
-                                    </li>
-                                    <li className="nav-item active">
-                                        <a className="nav-link" href="/contact-us">Contact-us <span className="sr-only">(current)</span></a>
-                                    </li>
-                                </ul>
-
-                                <ul className="navbar-nav navbar-right">
-                                    <li className="nav-item active">
-                                        <a className="nav-link" onClick={viewCart}><i className="fa fa-shopping-cart fa-2x" />
-                                            <span className="badge-success badge-pill">{Cart.totQuantity}</span>
-                                            Shopping Cart <span className="sr-only">(current)</span></a>
-                                    </li>
-
-                                    <li className="nav-item active">
-                                        <a className="nav-link" onClick={() => logOut()}><i className="fa fa-user fa-2x" /> Logout <span className="sr-only">(current)</span></a>
-                                    </li>
-                                </ul>
-
-                            </div>
-                        </nav>
-                    </div>
-                </div>
-                <div className="container">
-                    <div className="row">
-                        {items}
+                <LogedinHeader myCart = {this.state.myCart} totQuantity = {this.state.totQuantity} userID = {this.state.userID}/>
+                <div className="container bg-light">
+                        {this.productList()}
+                        <hr style={hrStyle}/>
+                    <div className ="figure-caption pb-5">
+                        {this.totalQuantity()}
+                        {this.totalAmount()}
+                        <button type="button" className="btn btn-success" onClick={this.handleCheckOut}>Check Out</button>
                     </div>
                 </div>
             </div>
-        )
-
-
+    );
+    }
 }
-//export default LandingPage
-const mapStateToProps = state => ({
-    isLoggedIn: state.isLoggedIn
-});
-export default connect(mapStateToProps,{ logOut})(MyCart);
