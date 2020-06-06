@@ -11,6 +11,8 @@ import Col from "react-bootstrap/Col";
 import "./Components/AlertStyles.css";
 import ConfirmDeleteFeedbackModal from "./Components/ConfirmDeleteFeedbackModal";
 import LogedinHeader from "./LogedInHeader";
+import Tabs from "react-bootstrap/Tabs";
+import Tab from "react-bootstrap/Tab";
 
 class Feedback extends Component {
 
@@ -42,12 +44,14 @@ class Feedback extends Component {
                 comment: "",
                 reply: ""
             },
+            allFeedbackList: [],
             feedbackList: [],
             hover: -1,
             showToast: false,
             toastMessage: '',
             toastType: 'Error',
-            typeColor: 'error'
+            typeColor: 'error',
+            key: 'home'
         }
 
 
@@ -111,9 +115,7 @@ class Feedback extends Component {
 
     }
 
-    calculateAverageRating() {
-
-        let feedbackList = this.state.feedbackList;
+    calculateAverageRating(feedbackList) {
 
         let nFeedbacks = feedbackList.length;
 
@@ -134,9 +136,9 @@ class Feedback extends Component {
 
     }
 
-    roundAverageRating() {
+    roundAverageRating(feedbackList) {
 
-        let overallRating = this.calculateAverageRating();
+        let overallRating = this.calculateAverageRating(feedbackList);
 
         if (overallRating < 0.5) {
             return 0;
@@ -193,31 +195,58 @@ class Feedback extends Component {
 
     fetchData() {
 
-        let url = "";
 
         if (localStorage.getItem('userEmail')) {
 
-            url = "http://localhost:4001/feedback/user/" + localStorage.getItem('userEmail');
+            let url = "http://localhost:4001/feedback/user/" + localStorage.getItem('userEmail');
 
-        } else {
+            fetch(url).then(response => response.json())
+                .then(json => this.setState({
+                        feedbackList: json
+                    }, () => {
 
-            url = "http://localhost:4001/feedback/";
+                        let sortedList = this.state.feedbackList;
+
+                        sortedList.sort((a, b) => {
+                            return new Date(b.updatedAt) - new Date(a.updatedAt)
+                        })
+
+                        this.setState({
+                            feedbackList: sortedList
+                        })
+
+
+                    })
+                ).catch(() => {
+                this.setErrorCatchToast();
+
+                setTimeout(() => {
+                    this.setState({
+                        showToast: false
+                    })
+                }, 5000);
+
+
+            });
+
 
         }
 
-        fetch(url).then(response => response.json())
+        let url2 = "http://localhost:4001/feedback/";
+
+        fetch(url2).then(response => response.json())
             .then(json => this.setState({
-                    feedbackList: json
+                    allFeedbackList: json
                 }, () => {
 
-                    let sortedList = this.state.feedbackList;
+                    let sortedList = this.state.allFeedbackList;
 
                     sortedList.sort((a, b) => {
                         return new Date(b.updatedAt) - new Date(a.updatedAt)
                     })
 
                     this.setState({
-                        feedbackList: sortedList
+                        allFeedbackList: sortedList
                     })
 
 
@@ -246,13 +275,14 @@ class Feedback extends Component {
             });
         }
 
+
     }
 
     useStyles = () => makeStyles({
         root: {
             width: 200,
             display: 'flex',
-            alignItems: 'center',
+            alignItems: 'center'
         },
     });
 
@@ -409,9 +439,15 @@ class Feedback extends Component {
 
         let feedbackList = this.state.feedbackList;
 
-        let average = this.calculateAverageRating();
+        let allFeedbackList = this.state.allFeedbackList;
 
-        let roundRating = this.roundAverageRating();
+        let average = this.calculateAverageRating(this.state.feedbackList);
+
+        let overallAverage = this.calculateAverageRating(this.state.allFeedbackList);
+
+        let roundRating = this.roundAverageRating(this.state.feedbackList);
+
+        let roundOverallRating = this.roundAverageRating(this.state.allFeedbackList);
 
         return (
             <>
@@ -421,182 +457,333 @@ class Feedback extends Component {
                                   message={this.state.toastMessage} messageType={this.state.toastType}
                                   statusColor={this.state.typeColor}/>
                 </div>
+                <div style={{backgroundColor: "white"}}>
+                    <Tabs
+                        id="controlled-tab-example"
+                        activeKey={this.state.key}
+                        style={{backgroundColor: "lightGrey"}}
+                        onSelect={(k) => this.setState({key: k})}
+                    >
 
-
-                <Row>
-                    <Col>
-                        <div className="ml-xl-5 pl-xl-5">
-                            <Card className="pt-0">
-                                <Card.Header as="h5">Feedback</Card.Header>
-                                <Card.Body>
-                                    <Form onSubmit={(event) => this.onFeedbackPost(event)}>
-                                        <Form.Group>
-                                            <Form.Label>Your&nbsp;Name</Form.Label>
-                                            {localStorage.getItem('fullName') ?
-                                                <Form.Control id="name" readOnly value={this.state.feedback.name}
-                                                              type="text" placeholder="Enter your Name here..."
-                                                              required/> :
-                                                <Form.Control id="name" onChange={(event) => this.onChangeText(event)}
-                                                              type="text" placeholder="Enter your Name here..."
-                                                              required/>
-                                            }
-
-                                        </Form.Group>
-                                        <Form.Group>
-                                            <Form.Label>Email&nbsp;Address</Form.Label>
-                                            {localStorage.getItem('userEmail') ?
-                                                <Form.Control id="emailId" type="email"
-                                                              readOnly value={this.state.feedback.email}
-                                                              placeholder="Enter your Email here.." required/> :
-                                                <Form.Control id="emailId" type="email"
-                                                              onChange={(event) => this.onChangeText(event)}
-                                                              placeholder="Enter your Email here.." required/>
-                                            }
-
-                                            <Form.Text className="text-muted">
-                                                We'll never share your email with anyone else.
-                                            </Form.Text>
-                                        </Form.Group>
-                                        <Form.Group>
-                                            <Form.Label>Your&nbsp;Rating</Form.Label>
-                                            {this.HoverRating()}
-                                        </Form.Group>
-                                        <Form.Group>
-                                            <Form.Label>Comment</Form.Label>
-                                            <Form.Control id="comment" as="textarea" required rows="3"
-                                                          onChange={(event) => this.onChangeText(event)}
-                                                          placeholder="Add your Comment here..."/>
-                                        </Form.Group>
-
-                                        <Button variant="primary" type="submit" block>
-                                            Publish
-                                        </Button>
-                                    </Form>
-                                </Card.Body>
-                            </Card>
-                        </div>
-
-
-                    </Col>
-                    <Col>
-                        <div className="pr-xl-5 mr-xl-5">
+                        <Tab eventKey="home" title="All Feedback from Users">
                             <Row>
-                                <Col>
+                                <Col xs={6} md={4}>
+                                    <div className="ml-xl-5 pl-xl-5">
+                                        <Row>
+                                            <Col>
 
-                                    <Card>
-                                        <Card.Header as="h5">Overall&nbsp;Rating&nbsp;:&nbsp;
-                                            <strong>{average > 0 ? average.toFixed(2) : 'No Rating'}</strong></Card.Header>
-                                        <Card.Body>
+                                                <Card>
+                                                    <Card.Header as="h5">Overall&nbsp;Rating</Card.Header>
+                                                    <Card.Body>
 
-                                            <div className={this.classes.root}>
-                                                <Rating
-                                                    size="large"
-                                                    max={7}
-                                                    name="half-rating-read size-large"
-                                                    value={roundRating}
-                                                    precision={0.5}
-                                                    readOnly
-                                                />
-                                            </div>
+                                                        <div className={this.classes.root}
+                                                             style={{textAlign: "center"}}>
 
-                                        </Card.Body>
-                                    </Card>
-                                </Col>
-                            </Row>
-                            <Row>
-                                <Col>
-
-                                    <Card>
-                                        <Card.Header as="h5"
-                                                     id="feedbackHeader">Feedback&nbsp;from&nbsp;{localStorage.getItem('userEmail') ? 'You' : 'Users'}</Card.Header>
-                                    </Card>
-                                    <Card className="pt-0 overflow-auto" id="list">
-                                        <Card.Body>
-
-                                            <div>
-                                                {
-                                                    feedbackList.map((feedback, index) => (
-                                                        <div key={index}>
-                                                            <div className="mr-5">
-                                                                <Card>
-                                                                    <Card.Header>
-                                                                        <div className="float-left">
-                                                                            {feedback.name}
-                                                                        </div>
-                                                                        <div className="float-right">
-                                                                            {feedback.email}
-                                                                        </div>
-                                                                    </Card.Header>
-                                                                    <Card.Body>
-                                                                        <div className="float-left">
-
-                                                                            <Card.Title>{feedback.comment}</Card.Title>
-
-                                                                            <div className={this.classes.root}>
-                                                                                <Rating
-                                                                                    size="large"
-                                                                                    max={7}
-                                                                                    name="read-only size-large"
-                                                                                    value={feedback.rating}
-                                                                                    precision={1}
-                                                                                    readOnly
-                                                                                />
-                                                                                <Box ml={0.5}
-                                                                                     className="text-muted">{this.labels[feedback.rating]}</Box>
-                                                                            </div>
-
-                                                                            <hr/>
-
-                                                                            {
-                                                                                feedback.reply !== "" ?
-                                                                                    <div>
-                                                                                        <Card.Subtitle>Reply</Card.Subtitle>
-                                                                                        <Card.Text>{feedback.reply}</Card.Text>
-                                                                                    </div> : <></>
-                                                                            }
-
-
-                                                                        </div>
-                                                                        {localStorage.getItem('userEmail') ?
-                                                                            <div className="float-right">
-
-                                                                                <ConfirmDeleteFeedbackModal
-                                                                                    onDeleteFeedback={this.onDeleteFeedback}
-                                                                                    feedbackId={feedback._id}/>
-                                                                            </div>
-                                                                            : <></>}
-
-
-                                                                    </Card.Body>
-                                                                    <Card.Footer>
-                                                                        <div className="float-left">
-                                                                            Created&nbsp;on&nbsp;{new Date(feedback.createdAt).toLocaleDateString()}&nbsp;@&nbsp;{new Date(feedback.createdAt).toLocaleTimeString()}
-                                                                        </div>
-                                                                        {
-                                                                            feedback.reply !== "" ?
-                                                                                <div className="float-right">
-                                                                                    Replied&nbsp;on&nbsp;{new Date(feedback.updatedAt).toLocaleDateString()}&nbsp;@&nbsp;{new Date(feedback.updatedAt).toLocaleTimeString()}
-                                                                                </div> : <></>
-                                                                        }
-                                                                    </Card.Footer>
-
-                                                                </Card>
-                                                            </div>
-                                                            <hr/>
+                                                            <strong
+                                                                style={{fontSize: "90px"}}>{overallAverage > 0 ? overallAverage.toFixed(2) : 0}</strong><br/>
+                                                            <Rating
+                                                                size="large"
+                                                                max={7}
+                                                                name="half-rating-read size-large"
+                                                                value={roundOverallRating}
+                                                                precision={0.5}
+                                                                readOnly
+                                                            /><br/>
+                                                            <p>Out&nbsp;of&nbsp;{this.state.allFeedbackList.length}</p>
                                                         </div>
-                                                    ))
 
-                                                }
-                                            </div>
-                                        </Card.Body>
-                                    </Card>
+
+                                                    </Card.Body>
+                                                </Card>
+                                            </Col>
+                                        </Row>
+                                    </div>
+
 
                                 </Col>
-                            </Row>
-                        </div>
-                    </Col>
-                </Row>
+                                <Col xs={12} md={8}>
+                                    <div className="pr-xl-5 mr-xl-5">
 
+                                        <Row>
+                                            <Col>
+
+                                                <Card style={{backgroundColor: "white"}}>
+                                                    <Card.Header as="h5"
+                                                                 id="feedbackHeader">Feedback&nbsp;from&nbsp;Users</Card.Header>
+                                                </Card>
+                                                <Card style={{backgroundColor: "lightGrey"}}
+                                                      className="pt-0 overflow-auto" id="list">
+                                                    <Card.Body>
+
+                                                        <div>
+                                                            {
+                                                                allFeedbackList.map((feedback, index) => (
+                                                                    <div key={index}>
+                                                                        <div className="mr-5">
+                                                                            <Card>
+                                                                                <Card.Header>
+                                                                                    <div className="float-left">
+                                                                                        {feedback.name}
+                                                                                    </div>
+                                                                                    <div className="float-right">
+                                                                                        {feedback.email}
+                                                                                    </div>
+                                                                                </Card.Header>
+                                                                                <Card.Body>
+                                                                                    <div className="float-left">
+
+                                                                                        <Card.Title>{feedback.comment}</Card.Title>
+
+                                                                                        <div
+                                                                                            className={this.classes.root}>
+                                                                                            <Rating
+                                                                                                size="large"
+                                                                                                max={7}
+                                                                                                name="read-only size-large"
+                                                                                                value={feedback.rating}
+                                                                                                precision={1}
+                                                                                                readOnly
+                                                                                            />
+                                                                                            <Box ml={0.5}
+                                                                                                 className="text-muted">{this.labels[feedback.rating]}</Box>
+                                                                                        </div>
+
+                                                                                        <hr/>
+
+                                                                                        {
+                                                                                            feedback.reply !== "" ?
+                                                                                                <div>
+                                                                                                    <Card.Subtitle>Reply</Card.Subtitle>
+                                                                                                    <Card.Text>{feedback.reply}</Card.Text>
+                                                                                                </div> : <></>
+                                                                                        }
+
+
+                                                                                    </div>
+
+
+                                                                                </Card.Body>
+                                                                                <Card.Footer>
+                                                                                    <div className="float-left">
+                                                                                        Created&nbsp;on&nbsp;{new Date(feedback.createdAt).toLocaleDateString()}&nbsp;@&nbsp;{new Date(feedback.createdAt).toLocaleTimeString()}
+                                                                                    </div>
+                                                                                    {
+                                                                                        feedback.reply !== "" ?
+                                                                                            <div
+                                                                                                className="float-right">
+                                                                                                Replied&nbsp;on&nbsp;{new Date(feedback.updatedAt).toLocaleDateString()}&nbsp;@&nbsp;{new Date(feedback.updatedAt).toLocaleTimeString()}
+                                                                                            </div> : <></>
+                                                                                    }
+                                                                                </Card.Footer>
+
+                                                                            </Card>
+                                                                        </div>
+                                                                        <hr/>
+                                                                    </div>
+                                                                ))
+
+                                                            }
+                                                        </div>
+                                                    </Card.Body>
+                                                </Card>
+
+                                            </Col>
+                                        </Row>
+                                    </div>
+                                </Col>
+                            </Row>
+                        </Tab>
+                        {localStorage.getItem('userEmail') ?
+                            <Tab eventKey="profile" title="Your Feedback Management">
+                                <Row>
+                                    <Col>
+                                        <div className="ml-xl-5 pl-xl-5">
+                                            <Card className="pt-0">
+                                                <Card.Header as="h5">Feedback</Card.Header>
+                                                <Card.Body>
+                                                    <Form onSubmit={(event) => this.onFeedbackPost(event)}>
+                                                        <Form.Group>
+                                                            <Form.Label>Your&nbsp;Name</Form.Label>
+                                                            {localStorage.getItem('fullName') ?
+                                                                <Form.Control id="name" readOnly
+                                                                              value={this.state.feedback.name}
+                                                                              type="text"
+                                                                              placeholder="Enter your Name here..."
+                                                                              required/> :
+                                                                <Form.Control id="name"
+                                                                              onChange={(event) => this.onChangeText(event)}
+                                                                              type="text"
+                                                                              placeholder="Enter your Name here..."
+                                                                              required/>
+                                                            }
+
+                                                        </Form.Group>
+                                                        <Form.Group>
+                                                            <Form.Label>Email&nbsp;Address</Form.Label>
+                                                            {localStorage.getItem('userEmail') ?
+                                                                <Form.Control id="emailId" type="email"
+                                                                              readOnly value={this.state.feedback.email}
+                                                                              placeholder="Enter your Email here.."
+                                                                              required/> :
+                                                                <Form.Control id="emailId" type="email"
+                                                                              onChange={(event) => this.onChangeText(event)}
+                                                                              placeholder="Enter your Email here.."
+                                                                              required/>
+                                                            }
+
+                                                            <Form.Text className="text-muted">
+                                                                We'll never share your email with anyone else.
+                                                            </Form.Text>
+                                                        </Form.Group>
+                                                        <Form.Group>
+                                                            <Form.Label>Your&nbsp;Rating</Form.Label>
+                                                            {this.HoverRating()}
+                                                        </Form.Group>
+                                                        <Form.Group>
+                                                            <Form.Label>Comment</Form.Label>
+                                                            <Form.Control id="comment" as="textarea" required rows="3"
+                                                                          onChange={(event) => this.onChangeText(event)}
+                                                                          placeholder="Add your Comment here..."/>
+                                                        </Form.Group>
+
+                                                        <Button variant="primary" type="submit" block>
+                                                            Publish
+                                                        </Button>
+                                                    </Form>
+                                                </Card.Body>
+                                            </Card>
+                                        </div>
+
+
+                                    </Col>
+                                    <Col>
+                                        <div className="pr-xl-5 mr-xl-5">
+                                            <Row>
+                                                <Col>
+
+                                                    <Card>
+                                                        <Card.Header as="h5">Your&nbsp;Overall&nbsp;Rating&nbsp;:&nbsp;
+                                                            <strong>{average > 0 ? average.toFixed(2) : 'No Rating'}</strong></Card.Header>
+                                                        <Card.Body>
+
+                                                            <div className={this.classes.root}>
+                                                                <Rating
+                                                                    size="large"
+                                                                    max={7}
+                                                                    name="half-rating-read size-large"
+                                                                    value={roundRating}
+                                                                    precision={0.5}
+                                                                    readOnly
+                                                                />
+                                                            </div>
+
+                                                        </Card.Body>
+                                                    </Card>
+                                                </Col>
+                                            </Row>
+                                            <Row>
+                                                <Col>
+
+                                                    <Card style={{backgroundColor: "white"}}>
+                                                        <Card.Header as="h5"
+                                                                     id="feedbackHeader">Feedback&nbsp;from&nbsp;You</Card.Header>
+                                                    </Card>
+                                                    <Card style={{backgroundColor: "lightGrey"}}
+                                                          className="pt-0 overflow-auto" id="list">
+                                                        <Card.Body>
+
+                                                            <div>
+                                                                {
+                                                                    feedbackList.map((feedback, index) => (
+                                                                        <div key={index}>
+                                                                            <div className="mr-5">
+                                                                                <Card>
+                                                                                    <Card.Header>
+                                                                                        <div className="float-left">
+                                                                                            {feedback.name}
+                                                                                        </div>
+                                                                                        <div className="float-right">
+                                                                                            {feedback.email}
+                                                                                        </div>
+                                                                                    </Card.Header>
+                                                                                    <Card.Body>
+                                                                                        <div className="float-left">
+
+                                                                                            <Card.Title>{feedback.comment}</Card.Title>
+
+                                                                                            <div
+                                                                                                className={this.classes.root}>
+                                                                                                <Rating
+                                                                                                    size="large"
+                                                                                                    max={7}
+                                                                                                    name="read-only size-large"
+                                                                                                    value={feedback.rating}
+                                                                                                    precision={1}
+                                                                                                    readOnly
+                                                                                                />
+                                                                                                <Box ml={0.5}
+                                                                                                     className="text-muted">{this.labels[feedback.rating]}</Box>
+                                                                                            </div>
+
+                                                                                            <hr/>
+
+                                                                                            {
+                                                                                                feedback.reply !== "" ?
+                                                                                                    <div>
+                                                                                                        <Card.Subtitle>Reply</Card.Subtitle>
+                                                                                                        <Card.Text>{feedback.reply}</Card.Text>
+                                                                                                    </div> : <></>
+                                                                                            }
+
+
+                                                                                        </div>
+                                                                                        {localStorage.getItem('userEmail') ?
+                                                                                            <div
+                                                                                                className="float-right">
+
+                                                                                                <ConfirmDeleteFeedbackModal
+                                                                                                    onDeleteFeedback={this.onDeleteFeedback}
+                                                                                                    feedbackId={feedback._id}/>
+                                                                                            </div>
+                                                                                            : <></>}
+
+
+                                                                                    </Card.Body>
+                                                                                    <Card.Footer>
+                                                                                        <div className="float-left">
+                                                                                            Created&nbsp;on&nbsp;{new Date(feedback.createdAt).toLocaleDateString()}&nbsp;@&nbsp;{new Date(feedback.createdAt).toLocaleTimeString()}
+                                                                                        </div>
+                                                                                        {
+                                                                                            feedback.reply !== "" ?
+                                                                                                <div
+                                                                                                    className="float-right">
+                                                                                                    Replied&nbsp;on&nbsp;{new Date(feedback.updatedAt).toLocaleDateString()}&nbsp;@&nbsp;{new Date(feedback.updatedAt).toLocaleTimeString()}
+                                                                                                </div> : <></>
+                                                                                        }
+                                                                                    </Card.Footer>
+
+                                                                                </Card>
+                                                                            </div>
+                                                                            <hr/>
+                                                                        </div>
+                                                                    ))
+
+                                                                }
+                                                            </div>
+                                                        </Card.Body>
+                                                    </Card>
+
+                                                </Col>
+                                            </Row>
+                                        </div>
+                                    </Col>
+                                </Row>
+                            </Tab>
+
+                            : <></>}
+
+                    </Tabs>
+                </div>
 
             </>
         );
